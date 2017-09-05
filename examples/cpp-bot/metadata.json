@@ -1,0 +1,4 @@
+{
+	"image": "library/gcc",
+	"entry_point": "./bot"
+}
