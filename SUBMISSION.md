@@ -2,7 +2,13 @@
 
 ## Подготовка решения к отправке
 
-В проверяющую систему необходимо отправить код бота, запакованный в ZIP-архив. В корне архива обязательно должен быть файл metadata.json следующего содержания:
+В проверяющую систему необходимо отправить код бота, запакованный в ZIP-архив. 
+
+Пример архивов:
+- [example-python-bot.zip](https://drive.google.com/file/d/0B7WVjmSt-QObWWx0a000aE16NVU/view?usp=sharing)
+- [example-cpp-bot.zip](https://drive.google.com/file/d/0B7WVjmSt-QObZDJGT3FtTzVPTUk/view?usp=sharing)
+
+В корне архива обязательно должен быть файл metadata.json следующего содержания:
 ```json
 {
     "image": "sberbank/python",
@@ -13,11 +19,11 @@
 Здесь `image` — название docker-образ, в котором будет запускаться решение, `entry_point` — команда, при помощи которой необходимо запустить решение. При этом для решения текущей директорией будет являться корень архива — вы можете положить туда рядом файлы.
 
 Для запуска решения доступны следующие образы:
-- sberbank/python — Python3 с установленным большим набором библиотек 
-- gcc - для запуска компилируемых C/C++ решений ([подробнее здесь](https://github.com/sberbank-ai/holdem-challenge/blob/master/GUIDE_CPP.md))
-- node — для запуска JavaScript
-- openjdk — для Java
-- mono — для C#
+- `sberbank/python` — Python3 с установленным большим набором библиотек
+- `gcc` - для запуска компилируемых C/C++ решений ([подробнее здесь](https://github.com/sberbank-ai/holdem-challenge/blob/master/GUIDE_CPP.md))
+- `node` — для запуска JavaScript
+- `openjdk` — для Java
+- `mono` — для C#
 
 Подойдет любой другой образ, доступный для загрузки из DockerHub. 
 
