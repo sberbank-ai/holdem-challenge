@@ -231,7 +231,7 @@ class DockerContainerPlayer(ExternalExecutablePlayer):
             return self._construct_answer(time_elapsed=info['time_elapsed'])
         action_valid_amount = valid_amounts[action]
         if isinstance(action_valid_amount, dict):
-            if amount < action_valid_amount['min'] or amount > action_valid_amount['max']:
+            if amount < action_valid_amount['min'] or amount > action_valid_amount['max'] or amount < 0:
                 self._set_fail('invalid_action', 'invalid amount for action {}, allowed {}..{}, requested {}'.format(
                     action, action_valid_amount['min'], action_valid_amount['max'], amount,
                 ))

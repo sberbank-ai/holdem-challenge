@@ -70,7 +70,13 @@ class ActionChecker:
   @classmethod
   def __min_raise_amount(self, players, sb_amount):
     raise_ = self.__fetch_last_raise(players)
-    return raise_["amount"] + raise_["add_amount"] if raise_ else sb_amount*2
+    if raise_:
+      # according to Non-limit Texas Holdem rules, BIGBLIND is not typical raise
+      # next player could raise minimum on amount of big blind
+      min_add_amount = raise_['add_amount'] if raise_['action'] != 'BIGBLIND' else raise_['amount']
+      return raise_["amount"] + min_add_amount
+    else:
+      return sb_amount*2
 
   @classmethod
   def __is_short_of_money(self, player, amount):
