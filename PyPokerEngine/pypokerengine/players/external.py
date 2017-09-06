@@ -47,6 +47,7 @@ class ExternalExecutablePlayer(BasePokerPlayer):
         return action, amount
 
     def receive_game_start_message(self, game_info):
+        game_info['uuid'] = self.uuid
         self._write_event('game_start', game_info)
 
     def receive_round_start_message(self, round_count, hole_card, seats):

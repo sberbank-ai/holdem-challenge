@@ -12,7 +12,6 @@ if __name__ == '__main__':
 
     config = setup_config(max_round=50, initial_stack=1500, small_blind_amount=15,
                           summary_file='example_game_replay.json')
-
     config.register_player(name='Participant', algorithm=player)
     for i in range(8):
         config.register_player(name='Random {}'.format(i), algorithm=RandomPlayer())

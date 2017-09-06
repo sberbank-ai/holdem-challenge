@@ -10,10 +10,11 @@ if __name__ == '__main__':
 
     # choose here your strategy
     player = DockerContainerPlayer(
-        source_dir='examples/specific-image',
+        source_dir='examples/bad-action',
         #image='sberbank/python',
         #entry_point='python bot.py',
         time_limit_action=0.2,
+        time_limit_bank=10,
     )
 
     config = setup_config(max_round=50, initial_stack=1500, small_blind_amount=15,
@@ -27,6 +28,7 @@ if __name__ == '__main__':
     game_scores = []
 
     for game_no in range(num_games):
+        config.summary_file = 'game_{}.json'.format(game_no)
         game_result = start_poker(config, verbose=0)
         participant_result = game_result['players'][0]
         game_scores.append(participant_result['stack'])
@@ -35,6 +37,9 @@ if __name__ == '__main__':
             participant_result['stack'],
             participant_result['state'],
         ))
+
+        if player.failed:
+            print('Bot failed: {}, {}'.format(player.fail_reason, player.fail_message))
 
     print('Elapsed time: {}'.format(datetime.datetime.now() - start_time))
     print('Score: {}'.format(sum(game_scores) / num_games))

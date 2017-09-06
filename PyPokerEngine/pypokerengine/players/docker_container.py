@@ -92,17 +92,19 @@ class DockerContainerPlayer(ExternalExecutablePlayer):
     def _update_container(self):
         self.container = self.docker_client.containers.get(self.container.id)
 
-    def _remove_container(self):
+    def stop(self):
         if self.container is not None:
             try:
                 self.container.remove(force=True)
             except docker.errors.NotFound:
                 pass
+            except docker.errors.APIError:
+                pass
         if self.attach_process is not None:
             self.attach_process.kill()
 
     def __del__(self):
-        self._remove_container()
+        self.stop()
 
     def _set_fail(self, reason, message=None):
         self.failed = True
@@ -112,17 +114,18 @@ class DockerContainerPlayer(ExternalExecutablePlayer):
         self.fail_game = None
         self.fail_round = None
 
-        self._remove_container()
+        self.stop()
 
-    def _construct_answer(self, action='fold', amount=0, time_elapsed=0):
+    def _construct_answer(self, action='fold', amount=0, time_elapsed=0, **kwargs):
         info = {
             'failed': self.failed,
             'time_elapsed': time_elapsed,
             'time_bank': self.time_available_bank,
         }
+        info.update(kwargs)
         return action, amount, info
 
-    def _read_answer(self):
+    def _read_answer(self, data):
         if self.failed:
             return self._construct_answer()
 
@@ -147,14 +150,15 @@ class DockerContainerPlayer(ExternalExecutablePlayer):
 
         if answer_line:
             try:
-                answer_parts = answer_line.decode('utf8').rstrip().split('\t')
+                answer_line = answer_line.decode('utf8').rstrip()
+                answer_parts = answer_line.split('\t')
             except UnicodeDecodeError:
-                self._set_fail('crash', 'invalid action format')
+                self._set_fail('crash', 'bad characters in answer line')
                 return self._construct_answer(time_elapsed=think_time)
 
             if len(answer_parts) != 2:
                 self._set_fail('crash', 'invalid action format')
-                return self._construct_answer(time_elapsed=think_time)
+                return self._construct_answer(time_elapsed=think_time, line=answer_line)
 
             action, amount = answer_parts
 
@@ -164,7 +168,7 @@ class DockerContainerPlayer(ExternalExecutablePlayer):
                 self._set_fail('crash', 'invalid action format: amount is not int')
                 return self._construct_answer(time_elapsed=think_time)
 
-            return self._construct_answer(action, amount, time_elapsed=think_time)
+            return self._construct_answer(action, amount, time_elapsed=think_time, line=answer_line, valid_actions=data['valid_actions'])
 
         elif attach_exit_code is not None:
             self._set_fail('crash', 'process exited during answering with code {}'.format(attach_exit_code))
@@ -196,14 +200,26 @@ class DockerContainerPlayer(ExternalExecutablePlayer):
         if self.failed:
             return self._construct_answer()
 
+        bot_stack = None
+        for seat in round_state['seats']:
+            if seat['uuid'] == self.uuid:
+                bot_stack = seat['stack']
+        bot_state = {
+            'uuid': self.uuid,
+            'time_limit_action': self.time_limit_action,
+            'time_limit_bank': self.time_available_bank,
+            'stack': bot_stack,
+        }
+
         data = {
             'valid_actions': valid_actions,
             'hole_card': hole_card,
             'round_state': round_state,
+            'bot_state': bot_state,
         }
         self._write_event('declare_action', data)
 
-        action, amount, info = self._read_answer()
+        action, amount, info = self._read_answer(data)
 
         # check action validity
         valid_amounts = {
