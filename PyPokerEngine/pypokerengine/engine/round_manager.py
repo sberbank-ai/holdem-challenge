@@ -25,9 +25,9 @@ class RoundManager:
     return state, start_msg + street_msgs
 
   @classmethod
-  def apply_action(self, original_state, action, bet_amount):
+  def apply_action(self, original_state, action, bet_amount, bot_info=None):
     state = self.__deep_copy_state(original_state)
-    state = self.__update_state_by_action(state, action, bet_amount)
+    state = self.__update_state_by_action(state, action, bet_amount, bot_info=bot_info)
     update_msg = self.__update_message(state, action, bet_amount)
     if self.__is_everyone_agreed(state):
       [player.save_street_action_histories(state["street"]) for player in state["table"].seats.players]
@@ -144,27 +144,27 @@ class RoundManager:
       return state, street_start_msg + ask_message
 
   @classmethod
-  def __update_state_by_action(self, state, action, bet_amount):
+  def __update_state_by_action(self, state, action, bet_amount, bot_info=None):
     table = state["table"]
     action, bet_amount = ActionChecker.correct_action(\
         table.seats.players, state["next_player"], state["small_blind_amount"], action, bet_amount)
     next_player = table.seats.players[state["next_player"]]
     if ActionChecker.is_allin(next_player, action, bet_amount):
       next_player.pay_info.update_to_allin()
-    return self.__accept_action(state, action, bet_amount)
+    return self.__accept_action(state, action, bet_amount, bot_info=bot_info)
 
   @classmethod
-  def __accept_action(self, state, action, bet_amount):
+  def __accept_action(self, state, action, bet_amount, bot_info=None):
     player = state["table"].seats.players[state["next_player"]]
     if action == 'call':
       self.__chip_transaction(player, bet_amount)
-      player.add_action_history(Const.Action.CALL, bet_amount)
+      player.add_action_history(Const.Action.CALL, bet_amount, bot_info=bot_info)
     elif action == 'raise':
       self.__chip_transaction(player, bet_amount)
       add_amount = bet_amount - ActionChecker.agree_amount(state["table"].seats.players)
-      player.add_action_history(Const.Action.RAISE, bet_amount, add_amount)
+      player.add_action_history(Const.Action.RAISE, bet_amount, add_amount, bot_info=bot_info)
     elif action == 'fold':
-      player.add_action_history(Const.Action.FOLD)
+      player.add_action_history(Const.Action.FOLD, bot_info=bot_info)
       player.pay_info.update_to_fold()
     else:
       raise ValueError("Unexpected action %s received" % action)

@@ -5,3 +5,9 @@
 dist
 build
 docs/site/*
+
+.idea
+.DS_Store
+
+examples/*.zip
+example_game_replay.json

@@ -48,8 +48,13 @@ class Dealer:
     while True:
       self.__message_check(msgs, state["street"])
       if state["street"] != Const.Street.FINISHED:  # continue the round
-        action, bet_amount = self.__publish_messages(msgs)
-        state, msgs = RoundManager.apply_action(state, action, bet_amount)
+        answer = self.__publish_messages(msgs)
+        bot_info = None
+        if len(answer) == 3:
+            action, bet_amount, bot_info = answer
+        else:
+            action, bet_amount = answer
+        state, msgs = RoundManager.apply_action(state, action, bet_amount, bot_info=bot_info)
       else:  # finish the round after publish round result
         self.__publish_messages(msgs)
         break
@@ -350,7 +355,7 @@ class GameSummarizer(object):
         self.game['seats'] = seats
         self.game['rounds'] = self.rounds
         if self.summary_file is not None:
-            self.summary_file.write(json.dumps(self.game) + '\n')
+            self.summary_file.write(json.dumps(self.game, indent=4) + '\n')
             self.summary_file.flush()
 
     def get_summary(self):

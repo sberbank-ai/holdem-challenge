@@ -47,7 +47,7 @@ class Player:
   def is_waiting_ask(self):
     return self.pay_info.status == PayInfo.PAY_TILL_END
 
-  def add_action_history(self, kind, chip_amount=None, add_amount=None, sb_amount=None):
+  def add_action_history(self, kind, chip_amount=None, add_amount=None, sb_amount=None, bot_info=None):
     history = None
     if kind == Const.Action.FOLD:
       history = self.__fold_history()
@@ -63,6 +63,8 @@ class Player:
       history = self.__ante_history(chip_amount)
     else:
       raise "UnKnown action history is added (kind = %s)" % kind
+    if bot_info is not None:
+      history['bot'] = bot_info
     history = self.__add_uuid_on_history(history)
     self.action_histories.append(history)
 
