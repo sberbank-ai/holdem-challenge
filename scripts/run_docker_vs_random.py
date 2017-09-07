@@ -17,8 +17,7 @@ if __name__ == '__main__':
         time_limit_bank=10,
     )
 
-    config = setup_config(max_round=50, initial_stack=1500, small_blind_amount=15,
-                          summary_file='example_game_replay.json')
+    config = setup_config(max_round=50, initial_stack=1500, small_blind_amount=15)
 
     config.register_player(name='Participant', algorithm=player)
     for i in range(8):
@@ -28,7 +27,7 @@ if __name__ == '__main__':
     game_scores = []
 
     for game_no in range(num_games):
-        config.summary_file = 'game_{}.json'.format(game_no)
+        config.summary_file = 'example_game_replay_{}.json'.format(game_no)
         game_result = start_poker(config, verbose=0)
         participant_result = game_result['players'][0]
         game_scores.append(participant_result['stack'])
