@@ -289,18 +289,12 @@ class GameSummarizer(object):
 
     def __init__(self, summary_file=None):
         self.summary_file = None
-        if summary_file is not None:
-            self.summary_file = open(summary_file, 'wt')
         self.game = {}
         self.game_start_seats = {}
         self.rounds = []
         self.round_start_seats = {}
         self.round_hole_cards = {}
         self.max_participating_round = {}
-
-    def __del__(self):
-        if self.summary_file is not None:
-            self.summary_file.close()
 
     def summarize_messages(self, raw_messages):
         for uuid, message in raw_messages:
@@ -356,8 +350,8 @@ class GameSummarizer(object):
         self.game['seats'] = seats
         self.game['rounds'] = self.rounds
         if self.summary_file is not None:
-            self.summary_file.write(json.dumps(self.game, indent=4) + '\n')
-            self.summary_file.flush()
+            with open(self.summary_file, 'wt') as fout:
+                self.summary_file.write(json.dumps(self.game, indent=4))
 
     def get_summary(self):
         return self.game
