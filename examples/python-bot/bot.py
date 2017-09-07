@@ -7,7 +7,7 @@ from pypokerengine.players import BasePokerPlayer
 class MyPlayer(BasePokerPlayer):  # Do not forget to make parent class as "BasePokerPlayer"
 
     #  we define the logic to make an action through this method. (so this method would be the core of your AI)
-    def declare_action(self, valid_actions, hole_card, round_state):
+    def declare_action(self, valid_actions, hole_card, round_state, bot_state):
         # valid_actions format => [raise_action_info, call_action_info, fold_action_info]
         call_action_info = valid_actions[1]
         action, amount = call_action_info["action"], call_action_info["amount"]
@@ -41,7 +41,8 @@ if __name__ == '__main__':
         data = json.loads(data)
 
         if event_type == 'declare_action':
-            action, amount = player.declare_action(data['valid_actions'], data['hole_card'], data['round_state'])
+            action, amount = player.declare_action(
+                data['valid_actions'], data['hole_card'], data['round_state'], data['bot_state'])
             sys.stdout.write('{}\t{}\n'.format(action, amount))
             sys.stdout.flush()
         elif event_type == 'game_start':

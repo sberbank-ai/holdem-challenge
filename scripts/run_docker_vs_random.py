@@ -32,10 +32,10 @@ if __name__ == '__main__':
         game_result = start_poker(config, verbose=0)
         participant_result = game_result['players'][0]
         game_scores.append(participant_result['stack'])
-        print('Game #{}: stack={}, state={}'.format(
+        print('Game #{}: stack={}, time_bank={}'.format(
             game_no,
             participant_result['stack'],
-            participant_result['state'],
+            player.time_available_bank,
         ))
 
         if player.failed:
