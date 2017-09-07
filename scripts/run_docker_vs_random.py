@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     # choose here your strategy
     player = DockerContainerPlayer(
-        source_dir='examples/bad-action',
+        source_dir='examples/python-bot',
         #image='sberbank/python',
         #entry_point='python bot.py',
         time_limit_action=0.2,
@@ -40,6 +40,7 @@ if __name__ == '__main__':
 
         if player.failed:
             print('Bot failed: {}, {}'.format(player.fail_reason, player.fail_message))
+            print(player.fail_stderr)
 
     print('Elapsed time: {}'.format(datetime.datetime.now() - start_time))
     print('Score: {}'.format(sum(game_scores) / num_games))

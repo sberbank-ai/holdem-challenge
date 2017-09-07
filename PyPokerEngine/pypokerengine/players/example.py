@@ -104,7 +104,10 @@ class RandomPlayer(BasePokerPlayer):
         elif r <= self.call_ratio:
             return valid_actions[1]
         else:
-            return valid_actions[2]
+            if valid_actions[2]['amount']['min'] >= 0:
+                return valid_actions[2]
+            else:
+                return valid_actions[0]
 
     def receive_game_start_message(self, game_info):
         pass

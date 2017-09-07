@@ -17,6 +17,8 @@ class DockerContainerPlayer(ExternalExecutablePlayer):
 
     def __init__(self, source_dir, image=None, entry_point=None, time_limit_action=0, time_limit_bank=60 * 5,
                  docker_client=None, **kwargs):
+        self.container = None
+        self.attach_process = None
 
         self.docker_client = docker_client if docker_client is not None else docker.DockerClient()
         self.source_dir = os.path.abspath(source_dir)
@@ -30,9 +32,6 @@ class DockerContainerPlayer(ExternalExecutablePlayer):
 
         self.time_available_bank = time_limit_bank
         self.failed = False
-
-        self.container = None
-        self.attach_process = None
 
         self._run_container(kwargs)
         self._attach_container()
@@ -68,7 +67,6 @@ class DockerContainerPlayer(ExternalExecutablePlayer):
             name=self.container_name,
             detach=True,
             stdin_open=True,
-            auto_remove=True,
             **self.docker_run_params
         )
 
@@ -81,6 +79,7 @@ class DockerContainerPlayer(ExternalExecutablePlayer):
             ['docker', 'attach', self.container.id],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
         self.executable_input = self.attach_process.stdin
         self.executable_output = self.attach_process.stdout
@@ -110,7 +109,9 @@ class DockerContainerPlayer(ExternalExecutablePlayer):
         self.failed = True
         self.fail_reason = reason
         self.fail_message = message
+        self.fail_stderr = self.container.logs(stderr=True, stdout=False)
 
+        # TODO
         self.fail_game = None
         self.fail_round = None
 

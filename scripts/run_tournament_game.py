@@ -78,9 +78,11 @@ def run_game(game_id, participants, archives_path, workspaces_path, game_config,
     game_result = None
     try:
         game_result = start_poker(config, verbose=1)
-    except ValueError:
+    except ValueError as e:
+        print(e)
         pass
-    except RuntimeError:
+    except RuntimeError as e:
+        print(e)
         pass
 
     for player in players:

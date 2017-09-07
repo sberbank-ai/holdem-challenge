@@ -299,7 +299,8 @@ class GameSummarizer(object):
         self.max_participating_round = {}
 
     def __del__(self):
-        self.summary_file.close()
+        if self.summary_file is not None:
+            self.summary_file.close()
 
     def summarize_messages(self, raw_messages):
         for uuid, message in raw_messages:
