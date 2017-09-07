@@ -36,11 +36,15 @@ class ActionChecker:
   def legal_actions(self, players, player_pos, sb_amount):
     min_raise = self.__min_raise_amount(players, sb_amount)
     max_raise = players[player_pos].stack + players[player_pos].paid_sum()
+    agree_amount = self.agree_amount(players)
     if max_raise < min_raise:
-      min_raise = max_raise = -1
+      if max_raise > agree_amount:
+        min_raise = max_raise
+      else:
+        min_raise = max_raise = -1
     return [
         { "action" : "fold" , "amount" : 0 },
-        { "action" : "call" , "amount" : self.agree_amount(players) },
+        { "action" : "call" , "amount" : min(agree_amount, players[player_pos].stack + players[player_pos].paid_sum()) },
         { "action" : "raise", "amount" : { "min": min_raise, "max": max_raise } }
     ]
 
@@ -69,26 +73,33 @@ class ActionChecker:
 
   @classmethod
   def __min_raise_amount(self, players, sb_amount):
-    raise_ = self.__fetch_last_raise(players)
-    if raise_:
-      # according to Non-limit Texas Holdem rules, BIGBLIND is not typical raise
-      # next player could raise minimum on amount of big blind
-      min_add_amount = raise_['add_amount'] if raise_['action'] != 'BIGBLIND' else raise_['amount']
-      return raise_["amount"] + min_add_amount
-    else:
-      return sb_amount*2
+    raise_histories = self.__raise_histories(players)
+
+    min_add_amount = sb_amount*2
+    max_amount = 0
+    for h in raise_histories:
+      min_add_amount = max(min_add_amount, h['add_amount'])
+      max_amount = max(max_amount, h['amount'])
+
+    return max_amount + min_add_amount
 
   @classmethod
   def __is_short_of_money(self, player, amount):
     return player.stack < amount - player.paid_sum()
 
   @classmethod
-  def __fetch_last_raise(self, players):
+  def __fetch_last_raise(self, players, by='amount'):
     all_histories = [p.action_histories for p in players]
     all_histories = reduce(lambda acc, e: acc + e, all_histories)  # flatten
     raise_histories = [h for h in all_histories if h["action"] in ["RAISE", "SMALLBLIND", "BIGBLIND"]]
     if len(raise_histories) == 0:
       return None
     else:
-      return max(raise_histories, key=lambda h: h["amount"])  # maxby
+      return max(raise_histories, key=lambda h: h[by])  # maxby
 
+  @classmethod
+  def __raise_histories(self, players):
+    all_histories = [p.action_histories for p in players]
+    all_histories = reduce(lambda acc, e: acc + e, all_histories)  # flatten
+    raise_histories = [h for h in all_histories if h["action"] in ["RAISE", "SMALLBLIND", "BIGBLIND"]]
+    return raise_histories
