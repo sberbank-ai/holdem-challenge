@@ -8,7 +8,14 @@ class MyPlayer(BasePokerPlayer):  # Do not forget to make parent class as "BaseP
 
     #  we define the logic to make an action through this method. (so this method would be the core of your AI)
     def declare_action(self, valid_actions, hole_card, round_state, bot_state=None):
-        # valid_actions format => [raise_action_info, call_action_info, fold_action_info]
+        # current bot state
+        my_uuid = self.uuid
+        my_current_stack = bot_state['stack']
+        time_to_action = bot_state['time_limit_action']
+        time_bank_remaining = bot_state['time_limit_bank']
+        total_time_remaining = time_bank_remaining + time_to_action
+
+        # valid_actions format => [call_action_info, fold_action_info, raise_action_info]
         call_action_info = valid_actions[1]
         action, amount = call_action_info["action"], call_action_info["amount"]
         return action, amount   # action returned here is sent to the poker engine
