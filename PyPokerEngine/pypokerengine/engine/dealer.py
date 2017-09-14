@@ -288,7 +288,7 @@ class MessageSummarizer(object):
 class GameSummarizer(object):
 
     def __init__(self, summary_file=None):
-        self.summary_file = None
+        self.summary_file = summary_file
         self.game = {}
         self.game_start_seats = {}
         self.rounds = []
@@ -351,7 +351,7 @@ class GameSummarizer(object):
         self.game['rounds'] = self.rounds
         if self.summary_file is not None:
             with open(self.summary_file, 'wt') as fout:
-                self.summary_file.write(json.dumps(self.game, indent=4))
+                fout.write(json.dumps(self.game))
 
     def get_summary(self):
         return self.game
