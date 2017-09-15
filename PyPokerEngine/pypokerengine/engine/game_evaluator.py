@@ -38,7 +38,7 @@ class GameEvaluator:
 
   @classmethod
   def __find_winners_from(self, community_card, players):
-    score_player = lambda player: HandEvaluator.eval_hand(player.hole_card, community_card)
+    score_player = lambda player: HandEvaluator.eval_hand_true(player.hole_card, community_card)
 
     active_players = [player for player in players if player.is_active()]
     scores = [score_player(player) for player in active_players]

@@ -1,5 +1,78 @@
 from functools import reduce
 from itertools import groupby
+import numpy as np
+import itertools
+
+
+def combination(d):
+  c = d.copy()
+  temp = 0
+
+  for j in range(5):
+    for i in range(j + 1, 5):
+      if c[i] == c[j]: temp += 1
+
+  if temp == 10: return -1
+
+  for j in range(5):
+    for i in range(4):
+      if c[i + 1] < c[i]:
+        c_temp = c[i]
+        c[i] = c[i + 1]
+        c[i + 1] = c_temp
+
+  P = [1, 13, 169, 169 * 13, 169 * 169]
+  k = 0
+
+  if temp == 6 or temp == 4:
+    if c[4] == c[2]:
+      k = c[4] * P[1] + c[0]
+    else:
+      k = c[2] * P[1] + c[4]
+  elif temp == 3:
+    if c[4] == c[2]: k = c[4] * P[2] + c[1] * P[1] + c[0]
+    if c[3] == c[1]: k = c[3] * P[2] + c[4] * P[1] + c[0]
+    if c[2] == c[0]: k = c[2] * P[2] + c[4] * P[1] + c[3]
+  elif temp == 2:
+    if c[4] != c[3]: k = c[3] * P[2] + c[1] * P[1] + c[4]
+    if c[0] != c[1]: k = c[3] * P[2] + c[1] * P[1] + c[0]
+    if c[2] != c[3]: k = c[3] * P[2] + c[1] * P[1] + c[2]
+  elif temp == 1:
+    if c[4] == c[3]: k = c[4] * P[3] + c[2] * P[2] + c[1] * P[1] + c[0]
+    if c[3] == c[2]: k = c[3] * P[3] + c[4] * P[2] + c[1] * P[1] + c[0]
+    if c[2] == c[1]: k = c[2] * P[3] + c[4] * P[2] + c[3] * P[1] + c[0]
+    if c[1] == c[0]: k = c[1] * P[3] + c[4] * P[2] + c[3] * P[1] + c[2]
+  elif temp == 0:
+    k = c[4] * P[4] + c[3] * P[3] + c[2] * P[2] + c[1] * P[1] + c[0] * P[0]
+
+  if temp == 6: temp = 7
+  if temp == 4: temp = 6
+  if temp == 0 and c[4] == 12 and c[3] == 3 and c[0] == 0: temp = 4; k = 1
+  if temp == 0 and (c[4] - c[0]) == 4: temp = 4
+
+  return temp * 10 ** 7 + k
+
+
+def combinationF5(cr, cs):
+  f = 0
+  sf = 0
+
+  if all(x == cs[0] for x in cs): f = 1
+  rank = combination(cr)
+  if f == 1: return 5 * 10 ** 7 + rank
+  return rank
+
+
+def combinationF7(cr, cs):
+  comb = []
+  idx_comb = list(itertools.combinations(range(7), 5))
+  for i in idx_comb:
+    try:
+      comb.append(combinationF5(cr=cr[list(i)], cs=cs[list(i)]))
+    except:
+      print(i)
+  return max(comb)
+
 
 class HandEvaluator:
 
@@ -53,6 +126,15 @@ class HandEvaluator:
     hole_flg = ranks[1] << 4 | ranks[0]
     hand_flg = self.__calc_hand_info_flg(hole, community) << 8
     return hand_flg | hole_flg
+
+  @classmethod
+  def eval_hand_true(self, hole, community):
+    cards = hole + community
+    if len(cards) < 7:
+        return 1
+    ranks = np.array([card.rank - 2 for card in cards])
+    suits = np.array([card.suit for card in cards])
+    return combinationF7(ranks, suits)
 
   # Return Format
   # [Bit flg of hand][rank1(4bit)][rank2(4bit)]
