@@ -14,14 +14,19 @@ from pypokerengine.players import ExternalExecutablePlayer
 class DockerContainerPlayer(ExternalExecutablePlayer):
     WAIT_ANSWER_TICK = 0.0001
     METADATA_FILE = 'metadata.json'
+    CPU_PERIOD = 50000
 
     def __init__(self, source_dir, image=None, entry_point=None, time_limit_action=0, time_limit_bank=60 * 5,
-                 docker_client=None, **kwargs):
+                 docker_client=None, mem_limit='2g', cpu_limit=1, pids_limit=128, **kwargs):
         self.container = None
         self.attach_process = None
 
         self.docker_client = docker_client if docker_client is not None else docker.DockerClient()
         self.source_dir = os.path.abspath(source_dir)
+
+        self.mem_limit = mem_limit
+        self.cpu_limit = cpu_limit
+        self.pids_limit = pids_limit
         self.time_limit_action = time_limit_action
         self.time_limit_bank = time_limit_bank
 
@@ -51,9 +56,10 @@ class DockerContainerPlayer(ExternalExecutablePlayer):
         self.docker_run_params = {
             'network': 'none',
             'network_disabled': True,
-            'mem_limit': '2g',
-            'cpu_period': 50000,
-            'cpu_quota': 50000,
+            'mem_limit': self.mem_limit,
+            'cpu_period': self.CPU_PERIOD,
+            'cpu_quota': int(self.CPU_PERIOD * self.cpu_limit),
+            'pids_limit': self.pids_limit,
         }
         self.docker_run_params.update(params)
 

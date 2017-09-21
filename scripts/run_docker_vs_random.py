@@ -15,6 +15,8 @@ if __name__ == '__main__':
         #entry_point='python bot.py',
         time_limit_action=0.2,
         time_limit_bank=10,
+        cpu_limit=2,
+        mem_limit='1g',
     )
 
     config = setup_config(max_round=50, initial_stack=1500, small_blind_amount=15)
