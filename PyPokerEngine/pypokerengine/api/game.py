@@ -4,7 +4,7 @@ from pypokerengine.players import BasePokerPlayer
 def setup_config(max_round, initial_stack, small_blind_amount, ante=0, summary_file=None):
     return Config(max_round, initial_stack, small_blind_amount, ante, summary_file)
 
-def start_poker(config, verbose=2):
+def start_poker(config, verbose=2, full_summary=False):
     config.validation()
     dealer = Dealer(config.sb_amount, config.initial_stack, config.ante, config.summary_file)
     dealer.set_verbose(verbose)
@@ -12,7 +12,10 @@ def start_poker(config, verbose=2):
     for info in config.players_info:
         dealer.register_player(info["name"], info["algorithm"])
     result_message = dealer.start_game(config.max_round)
-    return _format_result(result_message)
+    if full_summary:
+        return dealer.game_summarizer.get_summary()
+    else:
+        return _format_result(result_message)
 
 def _format_result(result_message):
     return {
